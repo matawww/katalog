@@ -1,0 +1,30 @@
+:root{
+/* Radii — tight, machined. Default is 2px; pills only for badges/toggles. */
+--radius-0:0;--radius-xs:2px;--radius-sm:4px;--radius-md:6px;--radius-lg:10px;--radius-full:999px;
+--radius-control:var(--radius-xs);--radius-card:var(--radius-sm);
+/* Chamfer — the 30°-cut corner borrowed from the hexagon mark */
+--chamfer-sm:8px;--chamfer-md:14px;--chamfer-lg:24px;
+/* Borders */
+--border-width:1px;--border-width-strong:2px;--rail-width:4px;
+/* Shadows — cool, low, used sparingly; borders do most of the work */
+--shadow-xs:0 1px 2px rgba(16,22,30,.06);
+--shadow-sm:0 1px 2px rgba(16,22,30,.06),0 2px 6px -2px rgba(16,22,30,.08);
+--shadow-md:0 4px 12px -2px rgba(16,22,30,.10),0 2px 4px -2px rgba(16,22,30,.06);
+--shadow-lg:0 18px 40px -10px rgba(16,22,30,.24),0 4px 10px -4px rgba(16,22,30,.10);
+--shadow-inset:inset 0 1px 2px rgba(16,22,30,.06);
+/* Motion */
+--ease-out:cubic-bezier(.2,.7,.2,1); /* @kind other */
+--ease-in-out:cubic-bezier(.6,0,.3,1); /* @kind other */
+--dur-fast:120ms; /* @kind other */
+--dur-base:200ms; /* @kind other */
+--dur-slow:320ms; /* @kind other */
+/* Layers */
+--z-nav:50; /* @kind other */
+--z-overlay:90; /* @kind other */
+--z-dialog:100; /* @kind other */
+--z-toast:110; /* @kind other */
+--z-tooltip:120; /* @kind other */
+/* Blueprint grid pattern for dark hero/inverse sections */
+--grid-line:rgba(185,195,206,.08);
+--bg-blueprint:linear-gradient(var(--grid-line) 1px,transparent 1px) 0 0/32px 32px,linear-gradient(90deg,var(--grid-line) 1px,transparent 1px) 0 0/32px 32px;
+}

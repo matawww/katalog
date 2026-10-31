@@ -1,0 +1,35 @@
+/* MTHtech color system — palette "1B Instrument" */
+:root{
+/* Lime — brand accent (logo + CTAs). Never as text on light surfaces. */
+--lime-50:#FAFCE8;--lime-100:#F3F7CC;--lime-200:#E7EF97;--lime-300:#DAE55B;--lime-400:#CCDB1E;--lime-500:#B8C61A;--lime-600:#949F13;--lime-700:#6B740D;--lime-800:#474D08;
+/* Ink — steel-blue neutrals. 900 = Midnight, 700 = Slate, 300 = Mist, 50 = Ice */
+--ink-950:#10161E;--ink-900:#1B2430;--ink-850:#222D3A;--ink-800:#2B3746;--ink-700:#3F4D5E;--ink-600:#566576;--ink-500:#738191;--ink-400:#96A2AF;--ink-300:#B9C3CE;--ink-200:#D5DCE3;--ink-100:#E6EAEF;--ink-50:#F2F4F6;--white:#FFFFFF;
+/* Named brand aliases */
+--brand-lime:var(--lime-400);--brand-midnight:var(--ink-900);--brand-slate:var(--ink-700);--brand-mist:var(--ink-300);--brand-ice:var(--ink-50);
+/* Print / physical equivalents (nearest matches — confirm with a proof before production)
+   Lime     #CCDB1E · CMYK 25/0/100/0   · Pantone 381 C  · RAL 1016
+   Midnight #1B2430 · CMYK 80/65/45/65  · Pantone 433 C  · RAL 7021
+   Slate    #3F4D5E · CMYK 75/55/35/35  · Pantone 7546 C · RAL 7031
+   Mist     #B9C3CE · CMYK 28/15/10/0   · Pantone 537 C  · RAL 7035
+   Ice      #F2F4F6 · CMYK 4/2/2/0      · —              · RAL 9016 */
+/* Status */
+--green-500:#2F9E6B;--green-100:#DDF2E7;--green-700:#1E6B47;
+--amber-500:#E2A01C;--amber-100:#FBEFD3;--amber-700:#8A5E07;
+--red-500:#D5453C;--red-100:#F9E0DE;--red-700:#9A2A23;
+--blue-500:#3B7AD4;--blue-100:#DFEAF8;--blue-700:#24528F;
+
+/* ---- Semantic: light surfaces (default) ---- */
+--bg-page:var(--white);--bg-subtle:var(--ink-50);--bg-muted:var(--ink-100);--bg-inverse:var(--ink-900);--bg-inverse-raised:var(--ink-850);
+--surface-card:var(--white);--surface-raised:var(--white);--surface-sunken:var(--ink-50);--surface-overlay:rgba(16,22,30,.56);
+--text-strong:var(--ink-900);--text-body:var(--ink-700);--text-muted:var(--ink-600);--text-subtle:var(--ink-500);--text-disabled:var(--ink-400);
+--text-on-inverse:var(--white);--text-on-inverse-muted:var(--ink-300);--text-on-accent:var(--ink-900);--text-accent-on-inverse:var(--lime-400);--text-link:var(--ink-900);
+--border-subtle:var(--ink-100);--border-default:var(--ink-200);--border-strong:var(--ink-300);--border-inverse:rgba(255,255,255,.12);--border-focus:var(--ink-900);
+--accent:var(--lime-400);--accent-hover:var(--lime-300);--accent-press:var(--lime-500);--accent-soft:var(--lime-100);--accent-ink:var(--lime-700);
+--primary:var(--ink-900);--primary-hover:var(--ink-800);--primary-press:var(--ink-950);
+--success:var(--green-500);--success-soft:var(--green-100);--success-ink:var(--green-700);
+--warning:var(--amber-500);--warning-soft:var(--amber-100);--warning-ink:var(--amber-700);
+--danger:var(--red-500);--danger-soft:var(--red-100);--danger-ink:var(--red-700);
+--info:var(--blue-500);--info-soft:var(--blue-100);--info-ink:var(--blue-700);
+--focus-ring:0 0 0 2px var(--white),0 0 0 4px var(--ink-900);
+--focus-ring-inverse:0 0 0 2px var(--ink-900),0 0 0 4px var(--lime-400);
+}
