@@ -38,6 +38,7 @@
     check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
     info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>',
     arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    cam: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
     x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'
   };
 
@@ -90,7 +91,9 @@
       '<div class="ph"><img loading="lazy" decoding="async" src="' + esc(p.i) + '" alt="">' +
       '<span class="check">' + ICON.check + '</span>' +
       '<button type="button" class="info" data-info="' + esc(p.c) + '" aria-label="Detalji: ' + esc(p.n) + '">' + ICON.info + '</button>' +
-      '<span class="sel-tag">U upitu</span></div>' +
+      '<span class="sel-tag">U upitu</span>' +
+      (p.x ? '<button type="button" class="more" data-info="' + esc(p.c) + '" data-gal="1" hidden aria-label="Više slika: ' + esc(p.n) + '">' + ICON.cam + '<em></em></button>' : '') +
+      '</div>' +
       '<div class="bd"><div class="nm"><b>' + esc(p.n) + '</b><span class="code">' + esc(p.c) + '</span></div>' +
       '<div class="desc">' + esc(p.d) + '</div>' +
       '<div class="meta"><span>Materijal: <b>' + esc(p.m) + '</b></span><span class="dim">' + esc(p.dim) + '</span>' +
@@ -208,7 +211,7 @@
     var h = location.hash;
     if (q.value.trim()) { q.value = ''; }
     var m = h.match(/^#\/k\/(\d+)/);
-    if (m) { current = { view: 'cat', id: m[1] }; renderCat(m[1]); }
+    if (m) { current = { view: 'cat', id: m[1] }; renderCat(m[1]); markExtras(); }
     else { current = { view: 'home' }; renderHome(); }
     window.scrollTo(0, 0);
   }
@@ -218,7 +221,7 @@
   q.addEventListener('input', function () {
     clearTimeout(st);
     st = setTimeout(function () {
-      if (q.value.trim().length >= 2) { current = { view: 'search' }; renderSearch(q.value); window.scrollTo(0, 0); }
+      if (q.value.trim().length >= 2) { current = { view: 'search' }; renderSearch(q.value); markExtras(); window.scrollTo(0, 0); }
       else if (!q.value.trim() && current.view === 'search') { route(); }
     }, 180);
   });
@@ -237,7 +240,7 @@
     var sc = e.target.closest('[data-scroll]');
     if (sc) { document.getElementById(sc.dataset.scroll).scrollIntoView({ behavior: 'smooth' }); return; }
     var info = e.target.closest('[data-info]');
-    if (info) { e.stopPropagation(); openDetail(info.dataset.info); return; }
+    if (info) { e.stopPropagation(); openDetail(info.dataset.info, !!info.dataset.gal); return; }
     var c = e.target.closest('.card');
     if (c) {
       var added = toggle(c.dataset.code);
@@ -264,9 +267,34 @@
     if (e.target.tagName === 'IMG') e.target.style.visibility = 'hidden';
   }, true);
 
+  // ---------- Dodatne slike ----------
+  // p.x = kandidati za dodatne slike; prikazuju se samo one koje se stvarno učitaju.
+  var probed = {};
+  function extras(p) {
+    if (!p.x) return Promise.resolve([]);
+    if (!probed[p.c]) {
+      probed[p.c] = Promise.all(p.x.map(function (u) {
+        return new Promise(function (res) {
+          var im = new Image();
+          im.onload = function () { res(im.naturalWidth > 1 ? u : null); };
+          im.onerror = function () { res(null); };
+          im.src = u;
+        });
+      })).then(function (a) { return a.filter(Boolean); });
+    }
+    return probed[p.c];
+  }
+  function markExtras() {
+    main.querySelectorAll('.more[data-info]').forEach(function (b) {
+      extras(byCode[b.dataset.info]).then(function (a) {
+        if (a.length) { b.hidden = false; b.querySelector('em').textContent = (a.length + 1) + ' slike'; }
+      });
+    });
+  }
+
   // ---------- Detalji ----------
   var dlg = $('#detail');
-  function openDetail(code) {
+  function openDetail(code, gal) {
     var p = byCode[code];
     var on = isSel(code);
     dlg.innerHTML = '<button class="d-x" type="button" data-close aria-label="Zatvori">' + ICON.x + '</button>' +
@@ -282,9 +310,24 @@
       '<button type="button" class="btn btn-lg ' + (on ? 'btn-ghost' : 'btn-lime') + '" data-dtoggle="' + esc(p.c) + '">' + (on ? 'Ukloni iz upita' : ICON.check + ' Dodaj u upit') + '</button>' +
       '</div></div>';
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    extras(p).then(function (list) {
+      if (!list.length || !dlg.open) return;
+      var imgs = [p.i].concat(list), box = dlg.querySelector('.d-img');
+      box.classList.add('has-th');
+      box.insertAdjacentHTML('beforeend', '<div class="d-th">' + imgs.map(function (u, i) {
+        return '<button type="button" data-img="' + esc(u) + '" aria-label="Slika ' + (i + 1) + '"><img src="' + esc(u) + '" alt=""></button>';
+      }).join('') + '</div>');
+      showImg(gal ? list[0] : p.i);
+    });
+  }
+  function showImg(u) {
+    dlg.querySelector('.d-img > img').src = u;
+    dlg.querySelectorAll('[data-img]').forEach(function (b) { b.setAttribute('aria-current', b.dataset.img === u ? 'true' : 'false'); });
   }
   dlg.addEventListener('click', function (e) {
     if (e.target === dlg || e.target.closest('[data-close]')) { dlg.close(); return; }
+    var im = e.target.closest('[data-img]');
+    if (im) { showImg(im.dataset.img); return; }
     var t = e.target.closest('[data-dtoggle]');
     if (t) { var added = toggle(t.dataset.dtoggle); toast(added ? 'Dodano u upit' : 'Uklonjeno iz upita'); dlg.close(); }
   });
