@@ -3,7 +3,7 @@
 Web katalog: https://matawww.github.io/katalog/
 
 - `index.html`, `app.css`, `app.js` – web stranica (kategorije, pretraga, odabir proizvoda, upit za cijenu)
-- `data.js` – podaci o proizvodima (313 proizvoda, 8 kategorija)
+- `data.js` – podaci o proizvodima (312 proizvoda, 8 kategorija)
 - `ispis.html` – A4 verzija kataloga za ispis / PDF
 - `ds/` – MTHtech design system (fontovi i tokeni)
 
