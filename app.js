@@ -26,6 +26,7 @@
     if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
     return many;
   }
+  function eur(v) { return v == null ? '' : v.toFixed(2).replace('.', ',') + ' €'; }
   function proizvoda(n) { return plural(n, 'proizvod', 'proizvoda', 'proizvoda'); }
   function norm(s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
@@ -96,6 +97,7 @@
       '</div>' +
       '<div class="bd"><div class="nm"><b>' + esc(p.n) + '</b><span class="code">' + esc(p.c) + '</span></div>' +
       '<div class="desc">' + esc(p.d) + '</div>' +
+      (p.pr != null ? '<div class="price"><b>' + eur(p.pr) + '</b><span>s PDV-om i graviranjem</span></div>' : '') +
       '<div class="meta"><span>Materijal: <b>' + esc(p.m) + '</b></span><span class="dim">' + esc(p.dim) + '</span>' +
       '<div class="foot-row">' + (swatches(p, 10) || '<span></span>') + lasers(p) + '</div></div>' +
       '</div></div>';
@@ -125,7 +127,7 @@
       '<section class="hero"><div class="hero-in"><div>' +
         '<span class="chip"><b>2026</b>MTHtech · Katalog proizvoda</span>' +
         '<h1>Vaš logo,<br><span>trajno ugraviran.</span></h1>' +
-        '<p>Promotivni proizvodi od drva, metala, kože i drugih materijala koje graviramo vlastitim CO2, diodnim i IR laserima. Odaberite proizvode koji vas zanimaju i pošaljite upit za cijenu.</p>' +
+        '<p>Promotivni proizvodi od drva, metala, kože i drugih materijala koje graviramo vlastitim CO2, diodnim i IR laserima. Uz svaki proizvod je cijena po komadu s PDV-om i graviranjem logotipa. Odaberite proizvode i pošaljite upit.</p>' +
         '<div class="cta-row"><button type="button" class="btn btn-lime btn-lg" data-scroll="kategorije">Pregledaj katalog ' + ICON.arrow + '</button>' +
         '<button type="button" class="btn btn-ghost btn-lg" data-scroll="kako">Kako poslati upit</button></div>' +
         '<div class="stats"><div><b>' + all.length + '</b><span>proizvoda</span></div><div><b>' + K.cats.length + '</b><span>kategorija</span></div><div><b>3</b><span>vrste lasera</span></div></div>' +
@@ -301,6 +303,7 @@
       '<div class="d-in"><div class="d-img"><img src="' + esc(p.i) + '" alt="' + esc(p.n) + '"></div><div class="d-bd">' +
       '<div class="eyebrow">' + p.cat.id + ' · ' + esc(p.cat.name) + '</div>' +
       '<div><h2 id="dTitle">' + esc(p.n) + '</h2><div class="code" style="margin-top:6px">Šifra ' + esc(p.c) + '</div></div>' +
+      (p.pr != null ? '<div class="price price-lg"><b>' + eur(p.pr) + '</b><span>po komadu, s PDV-om i laserskim graviranjem logotipa</span></div>' : '') +
       '<p style="font:400 15.5px/1.5 var(--font-sans);color:var(--ink-700)">' + esc(p.d) + '</p>' +
       '<dl><dt>Materijal</dt><dd>' + esc(p.m) + '</dd><dt>Dimenzije</dt><dd>' + esc(p.dim) + '</dd>' +
       (p.col ? '<dt>Boje · ' + p.col.length + (p.more ? '+' : '') + '</dt><dd>' + swatches(p) + '<div style="font-size:12.5px;color:var(--ink-600);margin-top:6px">' + esc(p.col.map(function (c) { return c[0]; }).join(', ')) + '</div></dd>' : '') +
@@ -358,6 +361,7 @@
     ul.innerHTML = sel.map(function (code) {
       var p = byCode[code];
       return '<li><span class="t"><img src="' + esc(p.i) + '" alt=""></span><div><b>' + esc(p.n) + '</b><span>' + esc(p.c) + ' · ' + esc(p.cat.name) + '</span></div>' +
+        '<strong class="sel-pr">' + eur(p.pr) + '</strong>' +
         '<button type="button" data-rm="' + esc(code) + '" aria-label="Ukloni ' + esc(p.n) + '">' + ICON.x + '</button></li>';
     }).join('');
     $('#selEmpty').hidden = sel.length > 0;
@@ -386,7 +390,8 @@
 
   function message() {
     var lines = ['Poštovani,', '', 'molim ponudu za lasersko graviranje sljedećih proizvoda:', ''];
-    sel.forEach(function (code, i) { var p = byCode[code]; lines.push((i + 1) + '. ' + p.c + ' – ' + p.n); });
+    sel.forEach(function (code, i) { var p = byCode[code]; lines.push((i + 1) + '. ' + p.c + ' – ' + p.n + (p.pr != null ? ' – ' + eur(p.pr) : '')); });
+    lines.push('', '(cijene po komadu s PDV-om, uključuju lasersko graviranje)');
     if (val('napomena')) lines.push('', 'Napomena: ' + val('napomena'));
     var who = [];
     if (val('ime')) who.push('Ime i prezime: ' + val('ime'));

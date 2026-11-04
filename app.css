@@ -156,6 +156,15 @@ img{max-width:100%}
 .empty-st{padding:72px 0;text-align:center;color:var(--ink-600)}
 .empty-st h2{font:500 22px/1.2 var(--font-display);margin-bottom:8px}
 
+/* ---------- Cijena ---------- */
+.price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.price b{font:700 20px/1 var(--font-display);color:var(--ink-900);letter-spacing:-.01em;background:linear-gradient(transparent 62%,var(--lime-300) 62%);padding:0 2px}
+.price span{font:400 11.5px/1.2 var(--font-mono);color:var(--ink-500)}
+.price-lg b{font-size:30px}
+.price-lg span{font-size:12.5px}
+.sel li{grid-template-columns:52px 1fr auto auto}
+.sel-pr{font:600 14px/1 var(--font-mono);color:var(--ink-900);white-space:nowrap}
+
 /* ---------- Više slika ---------- */
 .more{position:absolute;right:10px;bottom:10px;display:flex;align-items:center;gap:6px;height:30px;padding:0 9px;border:0;background:var(--ink-900);color:#fff;font:500 11px/1 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;z-index:1}
 .more svg{width:16px;height:16px;color:var(--lime-400)}
@@ -269,6 +278,8 @@ img{max-width:100%}
   .desc{font-size:13px}
   .meta{font-size:11.5px}
   .meta .dim{display:none}
+  .price b{font-size:17px}
+  .price span{font-size:10px}
   .check{width:28px;height:28px;top:6px;right:6px}
   .info{width:28px;height:28px;top:6px;left:6px}
   .more{right:6px;bottom:6px;height:26px;padding:0 7px}
