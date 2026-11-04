@@ -157,6 +157,7 @@ img{max-width:100%}
 .empty-st h2{font:500 22px/1.2 var(--font-display);margin-bottom:8px}
 
 /* ---------- Cijena ---------- */
+.hero .vat{margin-top:18px;max-width:560px;font:400 12.5px/1.5 var(--font-mono);color:var(--ink-400)}
 .price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .price b{font:700 20px/1 var(--font-display);color:var(--ink-900);letter-spacing:-.01em;background:linear-gradient(transparent 62%,var(--lime-300) 62%);padding:0 2px}
 .price span{font:400 11.5px/1.2 var(--font-mono);color:var(--ink-500)}
