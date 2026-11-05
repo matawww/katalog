@@ -163,7 +163,6 @@ img{max-width:100%}
 .price span{font:400 11.5px/1.2 var(--font-mono);color:var(--ink-500)}
 .price-lg b{font-size:30px}
 .price-lg span{font-size:12.5px}
-.sel li{grid-template-columns:52px 1fr auto auto}
 .sel-pr{font:600 14px/1 var(--font-mono);color:var(--ink-900);white-space:nowrap}
 
 /* ---------- Više slika ---------- */
@@ -177,6 +176,61 @@ img{max-width:100%}
 .d-th button:hover{box-shadow:inset 0 0 0 1px var(--ink-600)}
 .d-th button[aria-current="true"]{box-shadow:inset 0 0 0 2px var(--ink-900)}
 .d-th img{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);object-fit:contain}
+
+
+/* ---------- Odabir boje i količine (detalji) ---------- */
+.detail{overflow:auto}
+.d-add{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--ink-50);border-top:3px solid var(--lime-400)}
+.d-lbl{font:500 11px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-600);margin-bottom:8px}
+.d-lbl b{font-weight:500;color:var(--ink-900);letter-spacing:.04em;text-transform:none;font-family:var(--font-sans);font-size:13px}
+.d-lbl b.need{color:var(--ink-500)}
+.d-cols{display:flex;flex-wrap:wrap;gap:8px}
+.cbtn{width:30px;height:30px;padding:0;border:0;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(27,36,48,.25);transition:box-shadow .12s,transform .12s}
+.cbtn:hover{transform:scale(1.08)}
+.cbtn[aria-checked="true"]{box-shadow:inset 0 0 0 1px rgba(27,36,48,.25),0 0 0 2px #fff,0 0 0 4px var(--ink-900)}
+.cbtn-txt{width:auto;padding:0 10px;background:#fff;font:500 12px/1 var(--font-sans);color:var(--ink-900)}
+.d-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.qty{display:flex;height:44px;background:#fff;box-shadow:inset 0 0 0 1px var(--ink-300)}
+.qty input:focus,.qty input:focus-visible{box-shadow:none}
+.qty:focus-within{box-shadow:inset 0 0 0 1px var(--ink-900),0 0 0 3px var(--lime-200)}
+.qty button{width:44px;border:0;background:none;font:500 20px/1 var(--font-sans);color:var(--ink-700)}
+.qty button:hover{background:var(--ink-100);color:var(--ink-900)}
+.qty input{width:90px;border:0;outline:0;text-align:center;font:600 17px/1 var(--font-mono);color:var(--ink-900);background:none;-moz-appearance:textfield}
+.qty input::-webkit-outer-spin-button,.qty input::-webkit-inner-spin-button,.sel-q input::-webkit-outer-spin-button,.sel-q input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.d-sum{text-align:right}
+.d-sum span{display:block;font:500 11px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-600);margin-bottom:6px}
+.d-sum b{font:700 22px/1 var(--font-display);color:var(--ink-900)}
+.d-btns{display:flex;gap:8px;flex-wrap:wrap}
+.d-btns .btn{flex:1 1 auto}
+.d-bd .d-btns .btn{margin-top:0}
+.d-lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.d-lines:empty{display:none}
+.d-lines li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px dashed var(--ink-200);font:400 14px/1.3 var(--font-sans);color:var(--ink-900)}
+.d-lines li.d-lines-hd{border:0;padding:0 0 4px;font:500 11px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-600)}
+.d-lines i{width:16px;height:16px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(27,36,48,.25);flex:none}
+.d-lines span{flex:1}
+.d-lines b{font:600 13px/1 var(--font-mono)}
+.d-lines button{width:30px;height:30px;display:grid;place-items:center;border:0;background:none;color:var(--ink-500)}
+.d-lines button:hover{color:var(--red-500);background:var(--red-100)}
+.d-lines button svg{width:15px;height:15px}
+
+/* ---------- Stavke u upitu (drawer) ---------- */
+.sel li{grid-template-columns:52px minmax(0,1fr) auto auto;align-items:start}
+.sel-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sel li .sel-info span{font:400 12px/1.3 var(--font-mono);color:var(--ink-600)}
+.sel li .sel-col{display:flex;align-items:center;gap:6px;font:500 12.5px/1.2 var(--font-sans)!important;color:var(--ink-900)!important}
+.sel li .sel-col.need{color:var(--red-700)!important}
+.sel-col i{width:14px;height:14px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(27,36,48,.25);flex:none}
+.sel-col select{max-width:100%;min-width:0;height:30px;border:1px solid var(--ink-200);background:#fff;font:500 13px/1 var(--font-sans);color:var(--ink-900);padding:0 6px;outline:0}
+.sel-col select:focus{border-color:var(--ink-900);box-shadow:0 0 0 3px var(--lime-200)}
+.sel-col select[aria-invalid="true"]{border-color:var(--red-500);background:var(--red-100)}
+.sel-q{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.sel-q label{display:flex;align-items:center;gap:6px;font:400 12px/1 var(--font-mono);color:var(--ink-600)}
+.sel-q input{width:64px;height:34px;border:1px solid var(--ink-200);text-align:right;padding:0 8px;font:600 14px/1 var(--font-mono);color:var(--ink-900);outline:0;-moz-appearance:textfield}
+.sel-q input:focus{border-color:var(--ink-900);box-shadow:0 0 0 3px var(--lime-200)}
+.sel-q input[aria-invalid="true"]{border-color:var(--red-500);background:var(--red-100)}
+.sel-total{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;background:var(--ink-900);color:var(--ink-300);font:500 12px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+.sel-total b{font:700 22px/1 var(--font-display);color:var(--lime-400);letter-spacing:0}
 
 /* ---------- Detalji ---------- */
 .detail{border:0;padding:0;max-width:880px;width:calc(100% - 32px);max-height:calc(100% - 32px);background:#fff;color:var(--ink-700);box-shadow:var(--shadow-lg)}
@@ -210,7 +264,7 @@ img{max-width:100%}
 .x:hover{background:var(--ink-100)}
 .dr-body{flex:1;overflow-y:auto;padding:16px 24px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px}
 .sel{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.sel li{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink-100)}
+.sel li{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink-100)}
 .sel li .t{position:relative;width:52px;height:52px;background:#fff;border:1px solid var(--ink-100)}
 .sel li .t img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);object-fit:contain}
 .sel li b{display:block;font:500 15px/1.2 var(--font-display);color:var(--ink-900)}
@@ -285,6 +339,11 @@ img{max-width:100%}
   .info{width:28px;height:28px;top:6px;left:6px}
   .more{right:6px;bottom:6px;height:26px;padding:0 7px}
   .d-th button{width:48px;height:48px}
+  .d-bd{padding:20px}
+  .sel li{grid-template-columns:44px minmax(0,1fr) auto;row-gap:8px}
+  .sel li .t{width:44px;height:44px}
+  .sel-q{grid-column:2/3;flex-direction:row;align-items:center;justify-content:space-between}
+  .sel li > button{grid-column:3;grid-row:1}
   .row2{grid-template-columns:1fr}
   .stats{gap:24px}
   .foot-in{grid-template-columns:1fr}
@@ -293,3 +352,7 @@ img{max-width:100%}
 }
 @media (min-width:641px){.dock{display:none!important}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+
+/* Kvačica na kartici samo kao oznaka da je proizvod u upitu */
+.check{opacity:0}
+.card.sel .check{opacity:1}

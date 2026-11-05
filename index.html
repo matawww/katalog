@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1B2430">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="ds/styles.css">
-<link rel="stylesheet" href="app.css?v=11">
+<link rel="stylesheet" href="app.css?v=12">
 </head>
 <body>
 <a class="skip" href="#main">Preskoči na sadržaj</a>
@@ -56,7 +56,7 @@
 
 <!-- Mobilna traka s odabirom -->
 <div class="dock" id="dock" hidden>
-  <span><b id="dockN">0</b> <span id="dockW">proizvoda</span> odabrano</span>
+  <span><b id="dockN">0</b> <span id="dockW">stavki</span> u upitu</span>
   <button type="button" class="btn btn-lime" id="dockBtn">Pošalji upit</button>
 </div>
 
@@ -74,7 +74,8 @@
   </div>
   <div class="dr-body">
     <ul class="sel" id="selList"></ul>
-    <p class="empty" id="selEmpty">Još niste odabrali nijedan proizvod. Kliknite na proizvod u katalogu i on će se dodati u upit.</p>
+    <p class="empty" id="selEmpty">Upit je prazan. Kliknite na proizvod u katalogu, odaberite boju i količinu pa „Dodaj u upit”.</p>
+    <div class="sel-total" id="selTotal" hidden></div>
     <button type="button" class="link-btn" id="clearSel" hidden>Ukloni sve</button>
 
     <form class="form" id="form" novalidate>
@@ -87,7 +88,7 @@
         <label>E-mail<input name="email" type="email" autocomplete="email" inputmode="email"></label>
         <label>Telefon<input name="tel" type="tel" autocomplete="tel" inputmode="tel"></label>
       </div>
-      <label><span>Napomena <span class="opt">npr. okvirna količina, rok, logo</span></span><textarea name="napomena" rows="3"></textarea></label>
+      <label><span>Napomena <span class="opt">npr. rok isporuke, logo, mjesto gravure</span></span><textarea name="napomena" rows="3"></textarea></label>
       <p class="hint" id="formHint" role="status"></p>
       <div class="actions">
         <button type="submit" class="btn btn-lime btn-lg">
@@ -113,7 +114,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="data.js?v=11"></script>
-<script src="app.js?v=11"></script>
+<script src="data.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

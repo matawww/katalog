@@ -3,7 +3,7 @@
   var K = window.KATALOG;
   var EMAIL = 'info@mthtech.hr';
   var PHONE = '+385 91 474 7227';
-  var LS_SEL = 'mth-upit-v1', LS_FORM = 'mth-upit-forma-v1';
+  var LS_SEL = 'mth-upit-v2', LS_OLD = 'mth-upit-v1', LS_FORM = 'mth-upit-forma-v1';
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var main = $('#main'), tabs = $('#tabs'), q = $('#q');
@@ -26,7 +26,12 @@
     if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
     return many;
   }
-  function eur(v) { return v == null ? '' : v.toFixed(2).replace('.', ',') + ' €'; }
+  function eur(v) {
+    if (v == null) return '';
+    var p = v.toFixed(2).split('.');
+    return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + p[1] + ' €';
+  }
+  function stavki(n) { return plural(n, 'stavka', 'stavke', 'stavki'); }
   function proizvoda(n) { return plural(n, 'proizvod', 'proizvoda', 'proizvoda'); }
   function norm(s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
@@ -43,22 +48,37 @@
     x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'
   };
 
-  // ---------- Odabir ----------
-  var sel = load(LS_SEL, []).filter(function (c) { return byCode[c]; });
-  function isSel(code) { return sel.indexOf(code) !== -1; }
-  function toggle(code) {
-    var i = sel.indexOf(code);
-    if (i === -1) sel.push(code); else sel.splice(i, 1);
-    store(LS_SEL, sel);
-    syncSel(code);
-    return i === -1;
+  // ---------- Odabir (stavke upita: proizvod + boja + količina) ----------
+  var sel = load(LS_SEL, null);
+  if (!Array.isArray(sel)) {
+    // prijenos starog odabira (samo šifre) – količina se upisuje u upitu
+    sel = load(LS_OLD, []).filter(function (c) { return byCode[c]; }).map(function (c) { return { c: c, col: '', q: null }; });
+  }
+  sel = sel.filter(function (l) { return l && byCode[l.c]; });
+  function linesFor(code) { return sel.filter(function (l) { return l.c === code; }); }
+  function isSel(code) { return sel.some(function (l) { return l.c === code; }); }
+  function colorOf(p, name) {
+    var f = (p.col || []).filter(function (c) { return c[0] === name; })[0];
+    return f ? f[1] : null;
+  }
+  function saveSel(code) { store(LS_SEL, sel); syncSel(code); }
+  function addLine(code, col, q) {
+    var ex = sel.filter(function (l) { return l.c === code && l.col === col; })[0];
+    if (ex) ex.q = q; else sel.push({ c: code, col: col, q: q });
+    saveSel(code);
+    return !ex;
+  }
+  function removeLine(i) { var l = sel.splice(i, 1)[0]; saveSel(l && l.c); }
+  function lineTotal(l) { var p = byCode[l.c]; return p.pr != null && l.q ? p.pr * l.q : null; }
+  function grandTotal() {
+    var t = 0, ok = true;
+    sel.forEach(function (l) { var v = lineTotal(l); if (v == null) ok = false; else t += v; });
+    return { t: t, ok: ok };
   }
   function syncSel(code) {
     if (code) {
       document.querySelectorAll('.card[data-code="' + CSS.escape(code) + '"]').forEach(function (el) {
-        var on = isSel(code);
-        el.classList.toggle('sel', on);
-        el.setAttribute('aria-checked', on ? 'true' : 'false');
+        el.classList.toggle('sel', isSel(code));
       });
     }
     var n = sel.length, badge = $('#badge');
@@ -69,7 +89,7 @@
     }
     $('#dock').hidden = !n;
     $('#dockN').textContent = n;
-    $('#dockW').textContent = proizvoda(n);
+    $('#dockW').textContent = stavki(n);
     renderSelList();
     if (onlySel && current.view === 'cat') applyFilters();
   }
@@ -88,10 +108,9 @@
   }
   function card(p) {
     var on = isSel(p.c);
-    return '<div class="card' + (on ? ' sel' : '') + '" role="checkbox" tabindex="0" aria-checked="' + on + '" data-code="' + esc(p.c) + '" aria-label="' + esc(p.n + ', šifra ' + p.c) + '">' +
+    return '<div class="card' + (on ? ' sel' : '') + '" role="button" tabindex="0" aria-haspopup="dialog" data-code="' + esc(p.c) + '" aria-label="' + esc(p.n + ', šifra ' + p.c + ' – otvori detalje') + '">' +
       '<div class="ph"><img loading="lazy" decoding="async" src="' + esc(p.i) + '" alt="">' +
       '<span class="check">' + ICON.check + '</span>' +
-      '<button type="button" class="info" data-info="' + esc(p.c) + '" aria-label="Detalji: ' + esc(p.n) + '">' + ICON.info + '</button>' +
       '<span class="sel-tag">U upitu</span>' +
       (p.x ? '<button type="button" class="more" data-info="' + esc(p.c) + '" data-gal="1" hidden aria-label="Više slika: ' + esc(p.n) + '">' + ICON.cam + '<em></em></button>' : '') +
       '</div>' +
@@ -144,8 +163,8 @@
 
       '<section class="section how" id="kako"><div class="wrap"><div class="sec-hd"><div><div class="eyebrow">Upit za cijenu</div><h2>Tri koraka do ponude</h2></div></div>' +
       '<div class="steps">' +
-        '<div class="step"><h3>Odaberite proizvode</h3><p>Kliknite na proizvod i on ostaje označen. Možete birati iz više kategorija, odabir se pamti.</p></div>' +
-        '<div class="step"><h3>Ispunite upit</h3><p>Gumb „Upit” gore desno prikazuje odabrane proizvode s nazivom i šifrom. Dodajte svoje podatke i napomenu.</p></div>' +
+        '<div class="step"><h3>Odaberite proizvode</h3><p>Kliknite na proizvod, odaberite boju, upišite količinu i dodajte ga u upit. Odabir se pamti.</p></div>' +
+        '<div class="step"><h3>Ispunite upit</h3><p>Gumb „Upit” gore desno prikazuje odabrane proizvode s bojom, količinom i ukupnim iznosom. Dodajte svoje podatke i napomenu.</p></div>' +
         '<div class="step"><h3>Pošaljite</h3><p>Pošaljite e-mailom jednim klikom ili kopirajte upit i pošaljite ga porukom na ' + PHONE + '.</p></div>' +
       '</div></div></section>' +
 
@@ -245,11 +264,7 @@
     var info = e.target.closest('[data-info]');
     if (info) { e.stopPropagation(); openDetail(info.dataset.info, !!info.dataset.gal); return; }
     var c = e.target.closest('.card');
-    if (c) {
-      var added = toggle(c.dataset.code);
-      toast(added ? 'Dodano u upit: ' + byCode[c.dataset.code].n : 'Uklonjeno iz upita');
-      return;
-    }
+    if (c) { openDetail(c.dataset.code); return; }
     var f = e.target.closest('[data-laser]');
     if (f) {
       var l = f.dataset.laser, i = laserF.indexOf(l);
@@ -296,24 +311,43 @@
   }
 
   // ---------- Detalji ----------
-  var dlg = $('#detail');
+  var dlg = $('#detail'), dState = null;
   function openDetail(code, gal) {
     var p = byCode[code];
-    var on = isSel(code);
+    dState = { p: p, col: p.col && p.col.length === 1 ? p.col[0][0] : '' };
+    var cols = p.col ? p.col.map(function (c) {
+      return '<button type="button" class="cbtn" role="radio" aria-checked="false" data-col="' + esc(c[0]) + '" title="' + esc(c[0]) + '" aria-label="' + esc(c[0]) + '" style="background:' + esc(c[1]) + '"></button>';
+    }).join('') + (p.more ? '<button type="button" class="cbtn cbtn-txt" role="radio" aria-checked="false" data-col="Druga boja">Druga boja</button>' : '') : '';
     dlg.innerHTML = '<button class="d-x" type="button" data-close aria-label="Zatvori">' + ICON.x + '</button>' +
       '<div class="d-in"><div class="d-img"><img src="' + esc(p.i) + '" alt="' + esc(p.n) + '"></div><div class="d-bd">' +
       '<div class="eyebrow">' + p.cat.id + ' · ' + esc(p.cat.name) + '</div>' +
       '<div><h2 id="dTitle">' + esc(p.n) + '</h2><div class="code" style="margin-top:6px">Šifra ' + esc(p.c) + '</div></div>' +
       (p.pr != null ? '<div class="price price-lg"><b>' + eur(p.pr) + '</b><span>po komadu, usluga laserskog graviranja logotipa uključena je u cijenu</span></div>' : '') +
       '<p style="font:400 15.5px/1.5 var(--font-sans);color:var(--ink-700)">' + esc(p.d) + '</p>' +
+
+      '<div class="d-add">' +
+        (p.col ? '<div class="d-lbl">Boja <b id="dColName"></b></div><div class="d-cols" role="radiogroup" aria-label="Boja">' + cols + '</div>' : '') +
+        '<div class="d-row"><div><div class="d-lbl"><label for="dQty">Količina</label></div>' +
+          '<div class="qty"><button type="button" data-q="-1" aria-label="Manje">−</button>' +
+          '<input id="dQty" type="number" min="1" step="1" inputmode="numeric" placeholder="kom">' +
+          '<button type="button" data-q="1" aria-label="Više">+</button></div></div>' +
+          '<div class="d-sum" id="dSum"></div></div>' +
+        '<p class="hint" id="dHint" role="status"></p>' +
+        '<div class="d-btns"><button type="button" class="btn btn-lime btn-lg" data-add>' + ICON.check + ' Dodaj u upit</button>' +
+        '<button type="button" class="btn btn-ghost btn-lg" data-go hidden>Pregledaj upit</button></div>' +
+        '<ul class="d-lines" id="dLines"></ul>' +
+      '</div>' +
+
       '<dl><dt>Materijal</dt><dd>' + esc(p.m) + '</dd><dt>Dimenzije</dt><dd>' + esc(p.dim) + '</dd>' +
-      (p.col ? '<dt>Boje · ' + p.col.length + (p.more ? '+' : '') + '</dt><dd>' + swatches(p) + '<div style="font-size:12.5px;color:var(--ink-600);margin-top:6px">' + esc(p.col.map(function (c) { return c[0]; }).join(', ')) + '</div></dd>' : '') +
       '<dt>Laser</dt><dd>' + lasers(p) + '</dd></dl>' +
       (p.s ? '<div class="d-sg"><span class="eyebrow">Prijedlog personalizacije</span>' + esc(p.s) + '</div>' : '') +
       (p.nt ? '<p class="small">' + esc(p.nt) + '</p>' : '') +
-      '<button type="button" class="btn btn-lg ' + (on ? 'btn-ghost' : 'btn-lime') + '" data-dtoggle="' + esc(p.c) + '">' + (on ? 'Ukloni iz upita' : ICON.check + ' Dodaj u upit') + '</button>' +
       '</div></div>';
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    dlg.scrollTop = 0;
+    pickCol(dState.col);
+    renderDLines();
+    updSum();
     extras(p).then(function (list) {
       if (!list.length || !dlg.open) return;
       var imgs = [p.i].concat(list), box = dlg.querySelector('.d-img');
@@ -324,6 +358,40 @@
       showImg(gal ? list[0] : p.i);
     });
   }
+  function pickCol(name) {
+    if (!dState) return;
+    dState.col = name;
+    dlg.querySelectorAll('.cbtn').forEach(function (b) { b.setAttribute('aria-checked', b.dataset.col === name ? 'true' : 'false'); });
+    var lbl = $('#dColName', dlg);
+    if (lbl) { lbl.textContent = name ? '· ' + name : '· odaberite'; lbl.classList.toggle('need', !name); }
+    // ako je ova boja već u upitu, ponudi njenu količinu
+    var ex = sel.filter(function (l) { return l.c === dState.p.c && l.col === name; })[0];
+    var inp = $('#dQty', dlg);
+    if (inp && ex && ex.q) inp.value = ex.q;
+    updSum();
+  }
+  function qtyVal() {
+    var v = parseInt($('#dQty', dlg).value, 10);
+    return isNaN(v) || v < 1 ? null : v;
+  }
+  function updSum() {
+    var el = $('#dSum', dlg); if (!el || !dState) return;
+    var q = qtyVal(), p = dState.p;
+    el.innerHTML = q && p.pr != null ? '<span>Ukupno</span><b>' + eur(p.pr * q) + '</b>' : '';
+  }
+  function renderDLines() {
+    var ul = $('#dLines', dlg); if (!ul || !dState) return;
+    var p = dState.p, ls = [];
+    sel.forEach(function (l, i) { if (l.c === p.c) ls.push([l, i]); });
+    ul.innerHTML = ls.length ? '<li class="d-lines-hd">U upitu</li>' + ls.map(function (x) {
+      var l = x[0], hex = colorOf(p, l.col);
+      return '<li>' + (hex ? '<i style="background:' + esc(hex) + '"></i>' : '') +
+        '<span>' + esc(l.col || 'Bez odabira boje') + '</span><b>' + (l.q ? l.q + ' kom' : 'količina?') + '</b>' +
+        '<button type="button" data-drm="' + x[1] + '" aria-label="Ukloni">' + ICON.x + '</button></li>';
+    }).join('') : '';
+    var go = dlg.querySelector('[data-go]');
+    if (go) { go.hidden = !sel.length; go.textContent = 'Pregledaj upit (' + sel.length + ')'; }
+  }
   function showImg(u) {
     dlg.querySelector('.d-img > img').src = u;
     dlg.querySelectorAll('[data-img]').forEach(function (b) { b.setAttribute('aria-current', b.dataset.img === u ? 'true' : 'false'); });
@@ -332,14 +400,37 @@
     if (e.target === dlg || e.target.closest('[data-close]')) { dlg.close(); return; }
     var im = e.target.closest('[data-img]');
     if (im) { showImg(im.dataset.img); return; }
-    var t = e.target.closest('[data-dtoggle]');
-    if (t) { var added = toggle(t.dataset.dtoggle); toast(added ? 'Dodano u upit' : 'Uklonjeno iz upita'); dlg.close(); }
+    var cb = e.target.closest('.cbtn');
+    if (cb) { pickCol(cb.dataset.col); $('#dHint', dlg).textContent = ''; return; }
+    var qb = e.target.closest('[data-q]');
+    if (qb) {
+      var inp = $('#dQty', dlg), v = (qtyVal() || 0) + parseInt(qb.dataset.q, 10);
+      inp.value = Math.max(1, v); updSum(); $('#dHint', dlg).textContent = ''; return;
+    }
+    var rm = e.target.closest('[data-drm]');
+    if (rm) { removeLine(+rm.dataset.drm); renderDLines(); return; }
+    if (e.target.closest('[data-go]')) { dlg.close(); openInq(); return; }
+    if (e.target.closest('[data-add]')) {
+      var p = dState.p, h = $('#dHint', dlg), q = qtyVal();
+      h.className = 'hint';
+      if (p.col && !dState.col) { h.textContent = 'Odaberite boju.'; return; }
+      if (!q) { h.textContent = 'Upišite količinu.'; $('#dQty', dlg).focus(); return; }
+      var isNew = addLine(p.c, dState.col, q);
+      h.className = 'hint ok';
+      h.textContent = (isNew ? 'Dodano u upit' : 'Količina ažurirana') + (p.col ? ' – možete odabrati i drugu boju.' : '.');
+      toast((isNew ? 'Dodano: ' : 'Ažurirano: ') + p.n + (dState.col ? ' · ' + dState.col : '') + ' · ' + q + ' kom');
+      renderDLines();
+      if (p.col && p.col.length > 1) { $('#dQty', dlg).value = ''; pickCol(''); }
+    }
   });
+  dlg.addEventListener('input', function (e) { if (e.target.id === 'dQty') { updSum(); $('#dHint', dlg).textContent = ''; } });
+  dlg.addEventListener('keydown', function (e) { if (e.target.id === 'dQty' && e.key === 'Enter') { e.preventDefault(); dlg.querySelector('[data-add]').click(); } });
 
   // ---------- Drawer upita ----------
   var drawer = $('#drawer'), scrim = $('#scrim'), lastFocus;
   function openInq() {
     lastFocus = document.activeElement;
+    $('#toast').classList.remove('on');
     drawer.hidden = scrim.hidden = false;
     requestAnimationFrame(function () { drawer.classList.add('on'); scrim.classList.add('on'); });
     document.body.style.overflow = 'hidden';
@@ -359,22 +450,51 @@
 
   function renderSelList() {
     var ul = $('#selList');
-    ul.innerHTML = sel.map(function (code) {
-      var p = byCode[code];
-      return '<li><span class="t"><img src="' + esc(p.i) + '" alt=""></span><div><b>' + esc(p.n) + '</b><span>' + esc(p.c) + ' · ' + esc(p.cat.name) + '</span></div>' +
-        '<strong class="sel-pr">' + eur(p.pr) + '</strong>' +
-        '<button type="button" data-rm="' + esc(code) + '" aria-label="Ukloni ' + esc(p.n) + '">' + ICON.x + '</button></li>';
+    ul.innerHTML = sel.map(function (l, i) {
+      var p = byCode[l.c], hex = colorOf(p, l.col), tot = lineTotal(l);
+      return '<li data-i="' + i + '"><span class="t"><img src="' + esc(p.i) + '" alt=""></span>' +
+        '<div class="sel-info"><b>' + esc(p.n) + '</b><span>' + esc(p.c) + (p.pr != null ? ' · ' + eur(p.pr) + '/kom' : '') + '</span>' +
+        (p.col ? '<span class="sel-col' + (l.col ? '' : ' need') + '"><i data-sw="' + i + '" style="background:' + esc(hex || 'transparent') + '"></i>' +
+          '<select data-ci="' + i + '" aria-label="Boja: ' + esc(p.n) + '"' + (l.col ? '' : ' aria-invalid="true"') + '>' +
+          (l.col ? '' : '<option value="">Odaberite boju</option>') +
+          p.col.map(function (c) { return '<option' + (c[0] === l.col ? ' selected' : '') + '>' + esc(c[0]) + '</option>'; }).join('') +
+          (p.more ? '<option' + (l.col === 'Druga boja' ? ' selected' : '') + '>Druga boja</option>' : '') +
+          '</select></span>' : '') + '</div>' +
+        '<div class="sel-q"><label><input type="number" min="1" step="1" inputmode="numeric" value="' + (l.q || '') + '" data-qi="' + i + '" aria-label="Količina: ' + esc(p.n) + '"' + (l.q ? '' : ' aria-invalid="true"') + '> kom</label>' +
+        '<strong class="sel-pr" data-ti="' + i + '">' + (tot != null ? eur(tot) : '') + '</strong></div>' +
+        '<button type="button" data-rm="' + i + '" aria-label="Ukloni ' + esc(p.n) + '">' + ICON.x + '</button></li>';
     }).join('');
     $('#selEmpty').hidden = sel.length > 0;
     $('#clearSel').hidden = sel.length < 2;
-    $('#inqTitle').textContent = sel.length ? 'Odabrano: ' + sel.length + ' ' + proizvoda(sel.length) : 'Odabrani proizvodi';
+    updTotal();
+    $('#inqTitle').textContent = sel.length ? 'U upitu: ' + sel.length + ' ' + stavki(sel.length) : 'Odabrani proizvodi';
+  }
+  function updTotal() {
+    var el = $('#selTotal'), g = grandTotal();
+    el.hidden = !sel.length;
+    el.innerHTML = '<span>Ukupno' + (g.ok ? '' : ' (bez stavki bez količine)') + '</span><b>' + eur(g.t) + '</b>';
   }
   $('#selList').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-rm]'); if (b) toggle(b.dataset.rm);
+    var b = e.target.closest('[data-rm]'); if (b) removeLine(+b.dataset.rm);
+  });
+  $('#selList').addEventListener('input', function (e) {
+    var i = e.target.dataset.qi; if (i == null) return;
+    var v = parseInt(e.target.value, 10);
+    sel[+i].q = isNaN(v) || v < 1 ? null : v;
+    store(LS_SEL, sel);
+    if (sel[+i].q) e.target.removeAttribute('aria-invalid');
+    var t = lineTotal(sel[+i]);
+    $('[data-ti="' + i + '"]').textContent = t != null ? eur(t) : '';
+    updTotal();
+    hint.textContent = '';
+  });
+  $('#selList').addEventListener('change', function (e) {
+    var i = e.target.dataset.ci; if (i == null) return;
+    var l = sel[+i]; l.col = e.target.value; store(LS_SEL, sel); renderSelList(); hint.textContent = '';
   });
   $('#clearSel').addEventListener('click', function () {
-    var old = sel.slice(); sel = []; store(LS_SEL, sel);
-    old.forEach(syncSel); syncSel();
+    var codes = sel.map(function (l) { return l.c; }); sel = []; store(LS_SEL, sel);
+    codes.forEach(function (c) { syncSel(c); }); syncSel();
   });
 
   // ---------- Forma ----------
@@ -390,8 +510,15 @@
   function val(n) { return (form.elements[n].value || '').trim(); }
 
   function message() {
-    var lines = ['Poštovani,', '', 'molim ponudu za lasersko graviranje sljedećih proizvoda:', ''];
-    sel.forEach(function (code, i) { var p = byCode[code]; lines.push((i + 1) + '. ' + p.c + ' – ' + p.n + (p.pr != null ? ' – ' + eur(p.pr) : '')); });
+    var lines = ['Poštovani,', '', 'molim ponudu za sljedeće proizvode s laserskim graviranjem:', ''];
+    sel.forEach(function (l, i) {
+      var p = byCode[l.c], t = lineTotal(l);
+      lines.push((i + 1) + '. ' + p.c + ' – ' + p.n + (l.col ? ', boja: ' + l.col : '') +
+        ' – ' + (l.q ? l.q + ' kom' : 'količina ?') +
+        (p.pr != null ? ' × ' + eur(p.pr) + (t != null ? ' = ' + eur(t) : '') : ''));
+    });
+    var g = grandTotal();
+    if (g.t) lines.push('', 'Ukupno: ' + eur(g.t));
     lines.push('', '(cijene po komadu, usluga graviranja uključena je u cijenu)');
     if (val('napomena')) lines.push('', 'Napomena: ' + val('napomena'));
     var who = [];
@@ -404,9 +531,21 @@
     return lines.join('\n');
   }
   function needProducts() {
-    if (sel.length) return true;
-    hint.className = 'hint'; hint.textContent = 'Najprije odaberite barem jedan proizvod u katalogu.';
-    return false;
+    hint.className = 'hint';
+    if (!sel.length) { hint.textContent = 'Najprije dodajte barem jedan proizvod u upit.'; return false; }
+    var noCol = sel.filter(function (l) { return byCode[l.c].col && !l.col; });
+    if (noCol.length) {
+      hint.textContent = 'Odaberite boju za: ' + noCol.map(function (l) { return byCode[l.c].n; }).join(', ') + '.';
+      var s0 = $('#selList select[aria-invalid="true"]'); if (s0) s0.focus();
+      return false;
+    }
+    var miss = sel.filter(function (l) { return !l.q; });
+    if (miss.length) {
+      hint.textContent = 'Upišite količinu za: ' + miss.map(function (l) { return byCode[l.c].n + (l.col ? ' (' + l.col + ')' : ''); }).join(', ') + '.';
+      var f = $('#selList input[aria-invalid="true"]'); if (f) f.focus();
+      return false;
+    }
+    return true;
   }
 
   form.addEventListener('submit', function (e) {
@@ -423,7 +562,7 @@
       form.elements[bad[0]].focus();
       return;
     }
-    var subject = 'Upit za cijenu – ' + sel.length + ' ' + proizvoda(sel.length) + (val('tvrtka') ? ' – ' + val('tvrtka') : '');
+    var subject = 'Upit – ' + sel.length + ' ' + stavki(sel.length) + (val('tvrtka') ? ' – ' + val('tvrtka') : '');
     var url = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(message());
     window.location.href = url;
     hint.className = 'hint ok';
