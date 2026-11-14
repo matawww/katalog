@@ -124,6 +124,7 @@
       '</div>' +
       '<div class="bd"><div class="nm"><b>' + esc(p.n) + '</b><span class="code">' + esc(p.c) + '</span></div>' +
       '<div class="desc">' + esc(p.d) + '</div>' +
+      (p.hl ? '<div class="hl-tag">' + esc(p.hl[0]) + ' · programira se s vašim linkom ili kontaktom</div>' : '') +
       (p.pr != null ? '<div class="price"><b>' + eur(p.pr) + '</b><span>graviranje uključeno</span></div>' : '') +
       '<div class="meta">' + (p.pk ? '<span class="pk">' + ICON.box + pkShort(p) + '</span>' : '') + '<span>Materijal: <b>' + esc(p.m) + '</b></span><span class="dim">' + esc(p.dim) + '</span>' +
       '<div class="foot-row">' + (swatches(p, 10) || '<span></span>') + lasers(p) + '</div></div>' +
@@ -332,6 +333,7 @@
       '<div><h2 id="dTitle">' + esc(p.n) + '</h2><div class="code" style="margin-top:6px">Šifra ' + esc(p.c) + '</div></div>' +
       (p.pr != null ? '<div class="price price-lg"><b>' + eur(p.pr) + '</b><span>po komadu, usluga laserskog graviranja logotipa uključena je u cijenu</span></div>' : '') +
       '<p style="font:400 15.5px/1.5 var(--font-sans);color:var(--ink-700)">' + esc(p.d) + '</p>' +
+      (p.hl ? '<div class="d-hl"><span class="eyebrow">' + esc(p.hl[0]) + '</span>' + esc(p.hl[1]) + '</div>' : '') +
 
       '<div class="d-add">' +
         (p.col ? '<div class="d-lbl">Boja <b id="dColName"></b></div><div class="d-cols" role="radiogroup" aria-label="Boja">' + cols + '</div>' : '') +

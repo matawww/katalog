@@ -365,3 +365,8 @@ img{max-width:100%}
 .d-pk p{font:400 13.5px/1.45 var(--font-sans);color:var(--ink-800)}
 .d-pk .btn{grid-column:2;justify-self:start;height:34px;padding:0 12px;font-size:13px}
 .sel li .sel-info .sel-pk{font:400 11.5px/1.3 var(--font-sans);color:var(--ink-500)}
+
+/* Istaknuta značajka (npr. NFC čip) */
+.hl-tag{align-self:flex-start;font:500 11.5px/1.3 var(--font-mono);color:var(--ink-900);background:var(--lime-100);box-shadow:inset 3px 0 0 var(--lime-500);padding:5px 8px}
+.d-hl{padding:14px 16px;background:var(--lime-50);box-shadow:inset 3px 0 0 var(--lime-400);font:400 14.5px/1.5 var(--font-sans);color:var(--ink-900)}
+.d-hl .eyebrow{display:block;margin-bottom:6px;font-size:11px;color:var(--ink-700)}
