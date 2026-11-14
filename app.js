@@ -31,6 +31,13 @@
     var p = v.toFixed(2).split('.');
     return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + p[1] + ' €';
   }
+  // Pakiranje: p.pk = [broj komada, 'kutija' | 'paket']
+  function pkShort(p) { return p.pk ? (p.pk[1] === 'kutija' ? 'U kutiji ' : 'U paketu ') + p.pk[0] + ' kom' : ''; }
+  function pkText(p) {
+    if (!p.pk) return '';
+    var w = p.pk[1] === 'kutija' ? 'kutiji' : 'paketu', W = p.pk[1] === 'kutija' ? 'kutijama' : 'paketima';
+    return 'Dolazi u ' + w + ' od ' + p.pk[0] + ' komada. Preporučujemo narudžbu u punim ' + W + ', no možete naručiti i manju količinu.';
+  }
   function stavki(n) { return plural(n, 'stavka', 'stavke', 'stavki'); }
   function proizvoda(n) { return plural(n, 'proizvod', 'proizvoda', 'proizvoda'); }
   function norm(s) {
@@ -45,6 +52,7 @@
     info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>',
     arrow: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     cam: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    box: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></svg>',
     x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'
   };
 
@@ -117,7 +125,7 @@
       '<div class="bd"><div class="nm"><b>' + esc(p.n) + '</b><span class="code">' + esc(p.c) + '</span></div>' +
       '<div class="desc">' + esc(p.d) + '</div>' +
       (p.pr != null ? '<div class="price"><b>' + eur(p.pr) + '</b><span>graviranje uključeno</span></div>' : '') +
-      '<div class="meta"><span>Materijal: <b>' + esc(p.m) + '</b></span><span class="dim">' + esc(p.dim) + '</span>' +
+      '<div class="meta">' + (p.pk ? '<span class="pk">' + ICON.box + pkShort(p) + '</span>' : '') + '<span>Materijal: <b>' + esc(p.m) + '</b></span><span class="dim">' + esc(p.dim) + '</span>' +
       '<div class="foot-row">' + (swatches(p, 10) || '<span></span>') + lasers(p) + '</div></div>' +
       '</div></div>';
   }
@@ -332,6 +340,8 @@
           '<input id="dQty" type="number" min="1" step="1" inputmode="numeric" placeholder="kom">' +
           '<button type="button" data-q="1" aria-label="Više">+</button></div></div>' +
           '<div class="d-sum" id="dSum"></div></div>' +
+        (p.pk ? '<div class="d-pk">' + ICON.box + '<p>' + pkText(p) + '</p>' +
+          '<button type="button" class="btn btn-ghost" data-pk="' + p.pk[0] + '">+ ' + (p.pk[1] === 'kutija' ? 'kutija' : 'paket') + ' (' + p.pk[0] + ' kom)</button></div>' : '') +
         '<p class="hint" id="dHint" role="status"></p>' +
         '<div class="d-btns"><button type="button" class="btn btn-lime btn-lg" data-add>' + ICON.check + ' Dodaj u upit</button>' +
         '<button type="button" class="btn btn-ghost btn-lg" data-go hidden>Pregledaj upit</button></div>' +
@@ -407,6 +417,11 @@
       var inp = $('#dQty', dlg), v = (qtyVal() || 0) + parseInt(qb.dataset.q, 10);
       inp.value = Math.max(1, v); updSum(); $('#dHint', dlg).textContent = ''; return;
     }
+    var pkb = e.target.closest('[data-pk]');
+    if (pkb) {
+      var n = parseInt(pkb.dataset.pk, 10), cur = qtyVal() || 0;
+      $('#dQty', dlg).value = (Math.floor(cur / n) + 1) * n; updSum(); $('#dHint', dlg).textContent = ''; return;
+    }
     var rm = e.target.closest('[data-drm]');
     if (rm) { removeLine(+rm.dataset.drm); renderDLines(); return; }
     if (e.target.closest('[data-go]')) { dlg.close(); openInq(); return; }
@@ -454,6 +469,7 @@
       var p = byCode[l.c], hex = colorOf(p, l.col), tot = lineTotal(l);
       return '<li data-i="' + i + '"><span class="t"><img src="' + esc(p.i) + '" alt=""></span>' +
         '<div class="sel-info"><b>' + esc(p.n) + '</b><span>' + esc(p.c) + (p.pr != null ? ' · ' + eur(p.pr) + '/kom' : '') + '</span>' +
+        (p.pk ? '<span class="sel-pk">' + pkShort(p) + (l.q && l.q % p.pk[0] ? ' · preporuka: ' + (Math.ceil(l.q / p.pk[0]) * p.pk[0]) + ' kom' : '') + '</span>' : '') +
         (p.col ? '<span class="sel-col' + (l.col ? '' : ' need') + '"><i data-sw="' + i + '" style="background:' + esc(hex || 'transparent') + '"></i>' +
           '<select data-ci="' + i + '" aria-label="Boja: ' + esc(p.n) + '"' + (l.col ? '' : ' aria-invalid="true"') + '>' +
           (l.col ? '' : '<option value="">Odaberite boju</option>') +
